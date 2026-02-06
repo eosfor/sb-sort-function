@@ -1,0 +1,8 @@
+{
+    "azureFunctions.deploySubpath": "src/SbReorderingFunction/bin/Release/net8.0/publish",
+    "azureFunctions.projectLanguage": "C#",
+    "azureFunctions.projectRuntime": "~4",
+    "debug.internalConsoleOptions": "neverOpen",
+    "azureFunctions.projectSubpath": "src/SbReorderingFunction",
+    "azureFunctions.preDeployTask": "publish (functions)"
+}

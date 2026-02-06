@@ -1,0 +1,24 @@
+{
+  "name": "sb-sort-function",
+  "context": "..",
+  "dockerFile": "Dockerfile",
+  "runArgs": [
+    "--init",
+    "--network",
+    "microsoft-azure-servicebus-emulator_sb-emulator"
+  ],
+  "forwardPorts": [7071, 5300, 5672],
+  "postCreateCommand": "dotnet --list-sdks && func --version || true",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csharp",
+        "ms-azuretools.vscode-azurefunctions",
+        "ms-vscode.powershell",
+        "ms-dotnettools.csdevkit",
+        "openai.chatgpt"
+      ]
+    }
+  },
+  "remoteUser": "root"
+}

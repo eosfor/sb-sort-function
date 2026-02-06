@@ -1,0 +1,156 @@
+{
+  "UserConfig": {
+    "Logging": {
+      "Type": "Console"
+    },
+    "Namespaces": [
+      {
+        "Name": "sbemulatorns",
+        "Queues": [
+          {
+            "Name": "test-queue",
+            "Properties": {
+              "DeadLetteringOnMessageExpiration": false,
+              "DefaultMessageTimeToLive": "PT1H",
+              "DuplicateDetectionHistoryTimeWindow": "PT20S",
+              "ForwardDeadLetteredMessagesTo": "",
+              "ForwardTo": "",
+              "LockDuration": "PT1M",
+              "MaxDeliveryCount": 10,
+              "RequiresDuplicateDetection": false,
+              "RequiresSession": false
+            }
+          },
+          {
+            "Name": "session-queue",
+            "Properties": {
+              "DeadLetteringOnMessageExpiration": false,
+              "DefaultMessageTimeToLive": "PT1H",
+              "DuplicateDetectionHistoryTimeWindow": "PT20S",
+              "ForwardDeadLetteredMessagesTo": "",
+              "ForwardTo": "",
+              "LockDuration": "PT1M",
+              "MaxDeliveryCount": 10,
+              "RequiresDuplicateDetection": false,
+              "RequiresSession": true
+            }
+          }
+        ],
+        "Topics": [
+          {
+            "Name": "test-topic",
+            "Properties": {
+              "DefaultMessageTimeToLive": "PT1H",
+              "RequiresDuplicateDetection": false,
+              "DuplicateDetectionHistoryTimeWindow": "PT20S"
+            },
+            "Subscriptions": [
+              {
+                "Name": "test-sub",
+                "Properties": {
+                  "DeadLetteringOnMessageExpiration": false,
+                  "DefaultMessageTimeToLive": "PT1H",
+                  "LockDuration": "PT1M",
+                  "RequiresSession": false,
+                  "ForwardTo": "",
+                  "ForwardDeadLetteredMessagesTo": "",
+                  "MaxDeliveryCount": 10
+                }
+              }
+            ]
+          },
+          {
+            "Name": "session-topic",
+            "Properties": {
+              "DefaultMessageTimeToLive": "PT1H",
+              "RequiresDuplicateDetection": false,
+              "DuplicateDetectionHistoryTimeWindow": "PT20S"
+            },
+            "Subscriptions": [
+              {
+                "Name": "session-sub",
+                "Properties": {
+                  "DeadLetteringOnMessageExpiration": false,
+                  "DefaultMessageTimeToLive": "PT1H",
+                  "LockDuration": "PT1M",
+                  "RequiresSession": true,
+                  "ForwardTo": "",
+                  "ForwardDeadLetteredMessagesTo": "",
+                  "MaxDeliveryCount": 10
+                }
+              }
+            ]
+          },
+          {
+            "Name": "NO_SESSION",
+            "Properties": {
+              "DefaultMessageTimeToLive": "PT1H",
+              "RequiresDuplicateDetection": false,
+              "DuplicateDetectionHistoryTimeWindow": "PT20S"
+            },
+            "Subscriptions": [
+              {
+                "Name": "NO_SESS_SUB",
+                "Properties": {
+                  "DeadLetteringOnMessageExpiration": false,
+                  "DefaultMessageTimeToLive": "PT1H",
+                  "LockDuration": "PT1M",
+                  "RequiresSession": false,
+                  "ForwardTo": "",
+                  "ForwardDeadLetteredMessagesTo": "",
+                  "MaxDeliveryCount": 10
+                }
+              },
+              {
+                "Name": "STATE_SUB",
+                "Properties": {
+                  "DeadLetteringOnMessageExpiration": false,
+                  "DefaultMessageTimeToLive": "PT1H",
+                  "LockDuration": "PT1M",
+                  "RequiresSession": true,
+                  "ForwardTo": "",
+                  "ForwardDeadLetteredMessagesTo": "",
+                  "MaxDeliveryCount": 10
+                }
+              }
+            ]
+          },
+          {
+            "Name": "ORDERED_TOPIC",
+            "Properties": {
+              "DefaultMessageTimeToLive": "PT1H",
+              "RequiresDuplicateDetection": false,
+              "DuplicateDetectionHistoryTimeWindow": "PT20S"
+            },
+            "Subscriptions": [
+              {
+                "Name": "SESS_SUB",
+                "Properties": {
+                  "DeadLetteringOnMessageExpiration": false,
+                  "DefaultMessageTimeToLive": "PT1H",
+                  "LockDuration": "PT1M",
+                  "RequiresSession": true,
+                  "ForwardTo": "",
+                  "ForwardDeadLetteredMessagesTo": "",
+                  "MaxDeliveryCount": 10
+                }
+              },
+                            {
+                "Name": "SYSTEM_SUB",
+                "Properties": {
+                  "DeadLetteringOnMessageExpiration": false,
+                  "DefaultMessageTimeToLive": "PT1H",
+                  "LockDuration": "PT1M",
+                  "RequiresSession": true,
+                  "ForwardTo": "",
+                  "ForwardDeadLetteredMessagesTo": "",
+                  "MaxDeliveryCount": 10
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
