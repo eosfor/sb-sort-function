@@ -242,13 +242,14 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-// App Service Plan (Consumption)
+// App Service Plan (Basic - B1)
+// Changed from Consumption (Y1/Dynamic) to Basic (B1) to avoid Dynamic VM quota requirements
 resource appServicePlan 'Microsoft.Web/serverfarms@2023-01-01' = {
   name: appServicePlanName
   location: location
   sku: {
-    name: 'Y1'
-    tier: 'Dynamic'
+    name: 'B1'
+    tier: 'Basic'
   }
   properties: {}
 }
