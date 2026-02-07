@@ -61,9 +61,20 @@ The template provides these outputs:
 
 Configure these secrets in your GitHub repository:
 
+- `AZURE_CREDENTIALS` - JSON object containing Azure Service Principal credentials:
+  ```json
+  {
+    "clientId": "<AUTOMATION_CLIENT_ID>",
+    "clientSecret": "<AUTOMATION_CLIENT_SECRET>",
+    "subscriptionId": "0f47daf8-38d9-4100-9afc-7ceca28f800d",
+    "tenantId": "<AZURE_TENANT_ID>"
+  }
+  ```
+
+Alternatively, if you want to use individual secrets, you need to modify the workflow to use:
 - `AUTOMATION_CLIENT_ID` - Azure Service Principal Client ID
-- `AZURE_TENANT_ID` - Azure Tenant ID
-- `SUBSCRIPTION_ID` - Azure Subscription ID (default: 0f47daf8-38d9-4100-9afc-7ceca28f800d)
+- `AUTOMATION_CLIENT_SECRET` - Azure Service Principal Client Secret
+- `SUBSCRIPTION_ID` - Azure Subscription ID
 
 ### Workflow Configuration
 
