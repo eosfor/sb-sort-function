@@ -10,7 +10,7 @@ env:
   DOTNET_VERSION: '8.0.x'
   RESOURCE_GROUP: 'github-account-test'
   SUBSCRIPTION_ID: '0f47daf8-38d9-4100-9afc-7ceca28f800d'
-  LOCATION: 'eastus'
+  LOCATION: 'westus2'
   DEPLOYMENT_STACK_NAME: 'sb-reorder-test-stack'
 
 jobs:
