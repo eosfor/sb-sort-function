@@ -64,6 +64,14 @@ docker compose -f docker-compose.sbus.yml ps
 Остановить/очистить: `docker compose -f docker-compose.sbus.yml down -v`.
 Если SQL контейнер эмулятора не стартует, задайте переменные (в compose есть дефолты): `SQL_PASSWORD=LocalEmulatorSql123!`, `ACCEPT_EULA=Y`.
 
+Веб-порт эмулятора пробрасывается на `5300` (внутри — `5300`). Хотите другой — обновите `EMULATOR_HTTP_PORT` и соответствующий порт маппинг в `emulator/docker-compose.sbus.yml`.
+
+Devcontainer больше не зависит от сети эмулятора; для доступа к эмулятору из контейнера используйте `host.docker.internal` (проброшен в `runArgs`).
+
+Connection strings (эмулятор):
+- Хостовая ОС: `Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=LocalEmulatorKey123!;UseDevelopmentEmulator=true;`
+- Из devcontainer: `Endpoint=sb://host.docker.internal;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=LocalEmulatorKey123!;UseDevelopmentEmulator=true;`
+
 ## Запуск функции локально
 ```bash
 cd src/

@@ -62,6 +62,14 @@ docker compose -f docker-compose.sbus.yml down -v
 ```
 If the emulator SQL container fails to start, ensure env vars are provided (defaults are baked into compose): `SQL_PASSWORD=LocalEmulatorSql123!`, `ACCEPT_EULA=Y`.
 
+The emulator web port publishes to `5300` (internal `5300`). Prefer another? Adjust `EMULATOR_HTTP_PORT` and the port mapping in `emulator/docker-compose.sbus.yml`.
+
+Devcontainer no longer depends on the emulator network; access the emulator from inside the container via `host.docker.internal` (added in `runArgs`).
+
+Connection strings (emulator):
+- Host OS: `Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=LocalEmulatorKey123!;UseDevelopmentEmulator=true;`
+- From devcontainer: `Endpoint=sb://host.docker.internal;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=LocalEmulatorKey123!;UseDevelopmentEmulator=true;`
+
 ## Run the function locally
 ```bash
 cd src/

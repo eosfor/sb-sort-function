@@ -4,10 +4,10 @@
   "dockerFile": "Dockerfile",
   "runArgs": [
     "--init",
-    "--network",
-    "microsoft-azure-servicebus-emulator_sb-emulator"
+    "--add-host",
+    "host.docker.internal:host-gateway"
   ],
-  "forwardPorts": [7071, 5300, 5672],
+  "forwardPorts": [7071],
   "postCreateCommand": "dotnet --list-sdks && func --version || true",
   "customizations": {
     "vscode": {
