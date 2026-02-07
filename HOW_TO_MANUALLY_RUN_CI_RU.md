@@ -15,7 +15,7 @@ CI workflow настроен на запуск только вручную. Эт
 4. Справа вы увидите кнопку **"Run workflow"** (выпадающий список)
 
 5. Нажмите на выпадающий список **"Run workflow"**:
-   - Выберите вашу ветку: `copilot/sub-pr-2` из выпадающего списка "Branch"
+   - Выберите вашу ветку из выпадающего списка "Branch" (например, `copilot/sub-pr-2` или любую другую ветку)
    - Нажмите зеленую кнопку **"Run workflow"**
 
 6. Workflow начнет выполняться. Вы можете нажать на запущенный workflow, чтобы увидеть его прогресс и логи.
@@ -25,11 +25,14 @@ CI workflow настроен на запуск только вручную. Эт
 Если у вас установлен GitHub CLI, вы можете запустить workflow из командной строки:
 
 ```bash
-# Запустить workflow на ветке copilot/sub-pr-2
+# Запустить workflow на определенной ветке (замените на имя вашей ветки)
+gh workflow run "CI - Build, Deploy, Test and Cleanup" --ref имя-вашей-ветки
+
+# Пример: Запуск на ветке copilot/sub-pr-2
 gh workflow run "CI - Build, Deploy, Test and Cleanup" --ref copilot/sub-pr-2
 
 # Или используя имя файла workflow
-gh workflow run ci.yml --ref copilot/sub-pr-2
+gh workflow run ci.yml --ref имя-вашей-ветки
 
 # Посмотреть список запусков workflow
 gh run list --workflow=ci.yml
@@ -48,8 +51,10 @@ curl -X POST \
   -H "Authorization: Bearer YOUR_GITHUB_TOKEN" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   https://api.github.com/repos/eosfor/sb-sort-function/actions/workflows/ci.yml/dispatches \
-  -d '{"ref":"copilot/sub-pr-2"}'
+  -d '{"ref":"имя-вашей-ветки"}'
 ```
+
+Замените `имя-вашей-ветки` на фактическое имя ветки, на которой вы хотите запустить workflow.
 
 ## Предварительные требования
 

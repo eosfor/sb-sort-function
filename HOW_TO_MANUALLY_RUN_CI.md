@@ -15,7 +15,7 @@ The CI workflow has been configured to run only manually. This prevents automati
 4. On the right side, you'll see a **"Run workflow"** button (dropdown)
 
 5. Click the **"Run workflow"** dropdown:
-   - Select your branch: `copilot/sub-pr-2` from the "Branch" dropdown
+   - Select your branch from the "Branch" dropdown (e.g., `copilot/sub-pr-2` or any other branch)
    - Click the green **"Run workflow"** button
 
 6. The workflow will start executing. You can click on the workflow run to see its progress and logs.
@@ -25,11 +25,14 @@ The CI workflow has been configured to run only manually. This prevents automati
 If you have GitHub CLI installed, you can trigger the workflow from the command line:
 
 ```bash
-# Trigger the workflow on the copilot/sub-pr-2 branch
+# Trigger the workflow on a specific branch (replace with your branch name)
+gh workflow run "CI - Build, Deploy, Test and Cleanup" --ref your-branch-name
+
+# Example: Run on copilot/sub-pr-2 branch
 gh workflow run "CI - Build, Deploy, Test and Cleanup" --ref copilot/sub-pr-2
 
 # Or using the workflow file name
-gh workflow run ci.yml --ref copilot/sub-pr-2
+gh workflow run ci.yml --ref your-branch-name
 
 # View the workflow runs
 gh run list --workflow=ci.yml
@@ -48,8 +51,10 @@ curl -X POST \
   -H "Authorization: Bearer YOUR_GITHUB_TOKEN" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   https://api.github.com/repos/eosfor/sb-sort-function/actions/workflows/ci.yml/dispatches \
-  -d '{"ref":"copilot/sub-pr-2"}'
+  -d '{"ref":"your-branch-name"}'
 ```
+
+Replace `your-branch-name` with the actual branch name you want to run the workflow on.
 
 ## Prerequisites
 
