@@ -6,6 +6,18 @@
 - стандартный namespace (без транзакций);
 - premium namespace (с транзакциями на пересылке сообщений, но без транзакций при обновлении session state).
 
+## CI/CD Pipeline
+
+Проект включает автоматизированный CI/CD пайплайн для развертывания и тестирования в Azure. См. [CI_SETUP.md](CI_SETUP.md) для инструкций по настройке.
+
+Пайплайн автоматически:
+1. Собирает проект
+2. Разворачивает тестовые ресурсы (Standard и Premium Service Bus, Azure Functions)
+3. Прогоняет интеграционные тесты
+4. Удаляет ресурсы
+
+Инфраструктура описана в Bicep шаблонах в директории `infra/`. См. [infra/README.md](infra/README.md) для деталей.
+
 ## Ключевые решения
 - Фоновый воркер (без ServiceBusTrigger) принимает сессии через `AcceptNextSessionAsync` на `NO_SESSION/STATE_SUB`; это первая операция клиента, поэтому при `EnableCrossEntityTransactions=true` брокер выбирает эту подписку как send-via.
 - Один клиент Service Bus: `EnableCrossEntityTransactions` берётся из `ServiceBus:UseTransactions`/`ServiceBusUseTransactions` (для эмулятора игнорируется).

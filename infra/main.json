@@ -1,0 +1,497 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.40.2.10011",
+      "templateHash": "6407305665511193984"
+    }
+  },
+  "parameters": {
+    "baseName": {
+      "type": "string",
+      "defaultValue": "sbreorder",
+      "metadata": {
+        "description": "Base name for resources"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources"
+      }
+    },
+    "serviceBusStandardName": {
+      "type": "string",
+      "defaultValue": "[format('{0}-std-{1}', parameters('baseName'), uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "Service Bus Standard namespace name"
+      }
+    },
+    "serviceBusPremiumName": {
+      "type": "string",
+      "defaultValue": "[format('{0}-prem-{1}', parameters('baseName'), uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "Service Bus Premium namespace name"
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "defaultValue": "[format('st{0}', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "Storage account name for Azure Functions"
+      }
+    },
+    "appServicePlanName": {
+      "type": "string",
+      "defaultValue": "[format('{0}-plan-{1}', parameters('baseName'), uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "App Service Plan name"
+      }
+    },
+    "functionAppStandardName": {
+      "type": "string",
+      "defaultValue": "[format('{0}-std-{1}', parameters('baseName'), uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "Function App name for Standard Service Bus"
+      }
+    },
+    "functionAppPremiumName": {
+      "type": "string",
+      "defaultValue": "[format('{0}-prem-{1}', parameters('baseName'), uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "Function App name for Premium Service Bus"
+      }
+    },
+    "appInsightsName": {
+      "type": "string",
+      "defaultValue": "[format('{0}-ai-{1}', parameters('baseName'), uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "Application Insights name"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.ServiceBus/namespaces",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[parameters('serviceBusStandardName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard",
+        "tier": "Standard"
+      },
+      "properties": {
+        "minimumTlsVersion": "1.2"
+      }
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[parameters('serviceBusPremiumName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Premium",
+        "tier": "Premium",
+        "capacity": 1
+      },
+      "properties": {
+        "minimumTlsVersion": "1.2"
+      }
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[format('{0}/{1}', parameters('serviceBusStandardName'), 'NO_SESSION')]",
+      "properties": {
+        "defaultMessageTimeToLive": "PT1H",
+        "maxSizeInMegabytes": 1024,
+        "requiresDuplicateDetection": false,
+        "enableBatchedOperations": true,
+        "supportOrdering": true
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('serviceBusStandardName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[format('{0}/{1}/{2}', parameters('serviceBusStandardName'), 'NO_SESSION', 'NO_SESS_SUB')]",
+      "properties": {
+        "requiresSession": false,
+        "lockDuration": "PT1M",
+        "defaultMessageTimeToLive": "PT1H",
+        "maxDeliveryCount": 10
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces/topics', parameters('serviceBusStandardName'), 'NO_SESSION')]"
+      ]
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[format('{0}/{1}/{2}', parameters('serviceBusStandardName'), 'NO_SESSION', 'STATE_SUB')]",
+      "properties": {
+        "requiresSession": true,
+        "lockDuration": "PT1M",
+        "defaultMessageTimeToLive": "PT1H",
+        "maxDeliveryCount": 10
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces/topics', parameters('serviceBusStandardName'), 'NO_SESSION')]"
+      ]
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[format('{0}/{1}', parameters('serviceBusStandardName'), 'ORDERED_TOPIC')]",
+      "properties": {
+        "defaultMessageTimeToLive": "PT1H",
+        "maxSizeInMegabytes": 1024,
+        "requiresDuplicateDetection": false,
+        "enableBatchedOperations": true,
+        "supportOrdering": true
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('serviceBusStandardName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[format('{0}/{1}/{2}', parameters('serviceBusStandardName'), 'ORDERED_TOPIC', 'SESS_SUB')]",
+      "properties": {
+        "requiresSession": true,
+        "lockDuration": "PT1M",
+        "defaultMessageTimeToLive": "PT1H",
+        "maxDeliveryCount": 10
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces/topics', parameters('serviceBusStandardName'), 'ORDERED_TOPIC')]"
+      ]
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[format('{0}/{1}/{2}', parameters('serviceBusStandardName'), 'ORDERED_TOPIC', 'SYSTEM_SUB')]",
+      "properties": {
+        "requiresSession": true,
+        "lockDuration": "PT1M",
+        "defaultMessageTimeToLive": "PT1H",
+        "maxDeliveryCount": 10
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces/topics', parameters('serviceBusStandardName'), 'ORDERED_TOPIC')]"
+      ]
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[format('{0}/{1}', parameters('serviceBusPremiumName'), 'NO_SESSION')]",
+      "properties": {
+        "defaultMessageTimeToLive": "PT1H",
+        "maxSizeInMegabytes": 1024,
+        "requiresDuplicateDetection": false,
+        "enableBatchedOperations": true,
+        "supportOrdering": true
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('serviceBusPremiumName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[format('{0}/{1}/{2}', parameters('serviceBusPremiumName'), 'NO_SESSION', 'NO_SESS_SUB')]",
+      "properties": {
+        "requiresSession": false,
+        "lockDuration": "PT1M",
+        "defaultMessageTimeToLive": "PT1H",
+        "maxDeliveryCount": 10
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces/topics', parameters('serviceBusPremiumName'), 'NO_SESSION')]"
+      ]
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[format('{0}/{1}/{2}', parameters('serviceBusPremiumName'), 'NO_SESSION', 'STATE_SUB')]",
+      "properties": {
+        "requiresSession": true,
+        "lockDuration": "PT1M",
+        "defaultMessageTimeToLive": "PT1H",
+        "maxDeliveryCount": 10
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces/topics', parameters('serviceBusPremiumName'), 'NO_SESSION')]"
+      ]
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[format('{0}/{1}', parameters('serviceBusPremiumName'), 'ORDERED_TOPIC')]",
+      "properties": {
+        "defaultMessageTimeToLive": "PT1H",
+        "maxSizeInMegabytes": 1024,
+        "requiresDuplicateDetection": false,
+        "enableBatchedOperations": true,
+        "supportOrdering": true
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('serviceBusPremiumName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[format('{0}/{1}/{2}', parameters('serviceBusPremiumName'), 'ORDERED_TOPIC', 'SESS_SUB')]",
+      "properties": {
+        "requiresSession": true,
+        "lockDuration": "PT1M",
+        "defaultMessageTimeToLive": "PT1H",
+        "maxDeliveryCount": 10
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces/topics', parameters('serviceBusPremiumName'), 'ORDERED_TOPIC')]"
+      ]
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[format('{0}/{1}/{2}', parameters('serviceBusPremiumName'), 'ORDERED_TOPIC', 'SYSTEM_SUB')]",
+      "properties": {
+        "requiresSession": true,
+        "lockDuration": "PT1M",
+        "defaultMessageTimeToLive": "PT1H",
+        "maxDeliveryCount": 10
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces/topics', parameters('serviceBusPremiumName'), 'ORDERED_TOPIC')]"
+      ]
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/AuthorizationRules",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[format('{0}/{1}', parameters('serviceBusStandardName'), 'RootManageSharedAccessKey')]",
+      "properties": {
+        "rights": [
+          "Listen",
+          "Manage",
+          "Send"
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('serviceBusStandardName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/AuthorizationRules",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[format('{0}/{1}', parameters('serviceBusPremiumName'), 'RootManageSharedAccessKey')]",
+      "properties": {
+        "rights": [
+          "Listen",
+          "Manage",
+          "Send"
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', parameters('serviceBusPremiumName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-01-01",
+      "name": "[parameters('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "supportsHttpsTrafficOnly": true,
+        "minimumTlsVersion": "TLS1_2"
+      }
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[parameters('appInsightsName')]",
+      "location": "[parameters('location')]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web",
+        "Request_Source": "rest"
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2023-01-01",
+      "name": "[parameters('appServicePlanName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Y1",
+        "tier": "Dynamic"
+      },
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2023-01-01",
+      "name": "[parameters('functionAppStandardName')]",
+      "location": "[parameters('location')]",
+      "kind": "functionapp",
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
+        "siteConfig": {
+          "appSettings": [
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', parameters('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2023-01-01').keys[0].value)]"
+            },
+            {
+              "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+              "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', parameters('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2023-01-01').keys[0].value)]"
+            },
+            {
+              "name": "WEBSITE_CONTENTSHARE",
+              "value": "[toLower(parameters('functionAppStandardName'))]"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~4"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "dotnet-isolated"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_PROCESS_COUNT",
+              "value": "1"
+            },
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2020-02-02').InstrumentationKey]"
+            },
+            {
+              "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+              "value": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2020-02-02').ConnectionString]"
+            },
+            {
+              "name": "ServiceBusConnection",
+              "value": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/AuthorizationRules', parameters('serviceBusStandardName'), 'RootManageSharedAccessKey'), '2022-10-01-preview').primaryConnectionString]"
+            },
+            {
+              "name": "ServiceBusUseTransactions",
+              "value": "false"
+            }
+          ],
+          "netFrameworkVersion": "v8.0",
+          "ftpsState": "Disabled",
+          "minTlsVersion": "1.2"
+        },
+        "httpsOnly": true
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/components', parameters('appInsightsName'))]",
+        "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
+        "[resourceId('Microsoft.ServiceBus/namespaces/AuthorizationRules', parameters('serviceBusStandardName'), 'RootManageSharedAccessKey')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2023-01-01",
+      "name": "[parameters('functionAppPremiumName')]",
+      "location": "[parameters('location')]",
+      "kind": "functionapp",
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
+        "siteConfig": {
+          "appSettings": [
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', parameters('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2023-01-01').keys[0].value)]"
+            },
+            {
+              "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+              "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', parameters('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2023-01-01').keys[0].value)]"
+            },
+            {
+              "name": "WEBSITE_CONTENTSHARE",
+              "value": "[toLower(parameters('functionAppPremiumName'))]"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~4"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "dotnet-isolated"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_PROCESS_COUNT",
+              "value": "1"
+            },
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2020-02-02').InstrumentationKey]"
+            },
+            {
+              "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+              "value": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2020-02-02').ConnectionString]"
+            },
+            {
+              "name": "ServiceBusConnection",
+              "value": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/AuthorizationRules', parameters('serviceBusPremiumName'), 'RootManageSharedAccessKey'), '2022-10-01-preview').primaryConnectionString]"
+            },
+            {
+              "name": "ServiceBusUseTransactions",
+              "value": "true"
+            }
+          ],
+          "netFrameworkVersion": "v8.0",
+          "ftpsState": "Disabled",
+          "minTlsVersion": "1.2"
+        },
+        "httpsOnly": true
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/components', parameters('appInsightsName'))]",
+        "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
+        "[resourceId('Microsoft.ServiceBus/namespaces/AuthorizationRules', parameters('serviceBusPremiumName'), 'RootManageSharedAccessKey')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "serviceBusStandardConnectionString": {
+      "type": "string",
+      "value": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/AuthorizationRules', parameters('serviceBusStandardName'), 'RootManageSharedAccessKey'), '2022-10-01-preview').primaryConnectionString]"
+    },
+    "serviceBusPremiumConnectionString": {
+      "type": "string",
+      "value": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/AuthorizationRules', parameters('serviceBusPremiumName'), 'RootManageSharedAccessKey'), '2022-10-01-preview').primaryConnectionString]"
+    },
+    "functionAppStandardName": {
+      "type": "string",
+      "value": "[parameters('functionAppStandardName')]"
+    },
+    "functionAppPremiumName": {
+      "type": "string",
+      "value": "[parameters('functionAppPremiumName')]"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "value": "[parameters('storageAccountName')]"
+    },
+    "appInsightsInstrumentationKey": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2020-02-02').InstrumentationKey]"
+    }
+  }
+}

@@ -1,0 +1,194 @@
+name: CI - Build, Deploy, Test and Cleanup
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  RESOURCE_GROUP: 'github-account-test'
+  SUBSCRIPTION_ID: '0f47daf8-38d9-4100-9afc-7ceca28f800d'
+  LOCATION: 'eastus'
+  DEPLOYMENT_STACK_NAME: 'sb-reorder-test-stack'
+
+jobs:
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Publish Function App
+        run: dotnet publish src/src.csproj --configuration Release --output ./publish --no-build
+
+      - name: Upload Function App artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: function-app
+          path: ./publish
+
+  deploy:
+    name: Deploy Infrastructure and Applications
+    runs-on: ubuntu-latest
+    needs: build
+    outputs:
+      function-app-standard-name: ${{ steps.deploy-infra.outputs.functionAppStandardName }}
+      function-app-premium-name: ${{ steps.deploy-infra.outputs.functionAppPremiumName }}
+      servicebus-standard-connection: ${{ steps.deploy-infra.outputs.serviceBusStandardConnectionString }}
+      servicebus-premium-connection: ${{ steps.deploy-infra.outputs.serviceBusPremiumConnectionString }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Infrastructure with Deployment Stack
+        id: deploy-infra
+        run: |
+          echo "Deploying infrastructure using deployment stack..."
+          
+          # Deploy using deployment stack
+          az stack group create \
+            --name ${{ env.DEPLOYMENT_STACK_NAME }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --template-file ./infra/main.bicep \
+            --parameters location=${{ env.LOCATION }} \
+            --deny-settings-mode none \
+            --yes
+          
+          echo "Waiting for deployment to complete..."
+          
+          # Get outputs from deployment stack
+          outputs=$(az stack group show \
+            --name ${{ env.DEPLOYMENT_STACK_NAME }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --query 'outputs' -o json)
+          
+          echo "Deployment outputs: $outputs"
+          
+          # Extract output values
+          functionAppStandardName=$(echo $outputs | jq -r '.functionAppStandardName.value')
+          functionAppPremiumName=$(echo $outputs | jq -r '.functionAppPremiumName.value')
+          serviceBusStandardConnectionString=$(echo $outputs | jq -r '.serviceBusStandardConnectionString.value')
+          serviceBusPremiumConnectionString=$(echo $outputs | jq -r '.serviceBusPremiumConnectionString.value')
+          
+          echo "functionAppStandardName=$functionAppStandardName" >> $GITHUB_OUTPUT
+          echo "functionAppPremiumName=$functionAppPremiumName" >> $GITHUB_OUTPUT
+          echo "serviceBusStandardConnectionString=$serviceBusStandardConnectionString" >> $GITHUB_OUTPUT
+          echo "serviceBusPremiumConnectionString=$serviceBusPremiumConnectionString" >> $GITHUB_OUTPUT
+          
+          echo "Deployment completed successfully"
+
+      - name: Download Function App artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: function-app
+          path: ./publish
+
+      - name: Deploy Function App to Standard Service Bus instance
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ steps.deploy-infra.outputs.functionAppStandardName }}
+          package: ./publish
+
+      - name: Deploy Function App to Premium Service Bus instance
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ steps.deploy-infra.outputs.functionAppPremiumName }}
+          package: ./publish
+
+      - name: Wait for Function Apps to be ready
+        run: |
+          echo "Waiting for Function Apps to start..."
+          sleep 60
+
+  test-standard:
+    name: Test Standard Service Bus
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore test dependencies
+        run: dotnet restore tests/SbReorder.Tests
+
+      - name: Run tests against Standard Service Bus
+        env:
+          ServiceBusConnection: ${{ needs.deploy.outputs.servicebus-standard-connection }}
+          ServiceBusUseTransactions: 'false'
+        run: |
+          echo "Running tests for Standard Service Bus..."
+          dotnet test tests/SbReorder.Tests --configuration Release --logger "console;verbosity=detailed"
+
+  test-premium:
+    name: Test Premium Service Bus
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore test dependencies
+        run: dotnet restore tests/SbReorder.Tests
+
+      - name: Run tests against Premium Service Bus
+        env:
+          ServiceBusConnection: ${{ needs.deploy.outputs.servicebus-premium-connection }}
+          ServiceBusUseTransactions: 'true'
+        run: |
+          echo "Running tests for Premium Service Bus..."
+          dotnet test tests/SbReorder.Tests --configuration Release --logger "console;verbosity=detailed"
+
+  cleanup:
+    name: Cleanup Resources
+    runs-on: ubuntu-latest
+    needs: [test-standard, test-premium]
+    if: always()
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Delete Deployment Stack
+        run: |
+          echo "Deleting deployment stack and all managed resources..."
+          az stack group delete \
+            --name ${{ env.DEPLOYMENT_STACK_NAME }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --delete-all \
+            --yes || echo "Stack may not exist or already deleted"
+          
+          echo "Cleanup completed"

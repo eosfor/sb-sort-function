@@ -1,4 +1,4 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -6,17 +6,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "src", "src\src.csproj", "{7
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src (1)", "src (1)", "{108A3DD7-C28F-90A1-5CEB-F409847E62A8}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SbReorder.Tests", "tests\SbReorder.Tests\SbReorder.Tests.csproj", "{AECBEAC1-3551-D6DE-7BFF-D7FB91513550}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "obj", "obj", "{47459019-0EE7-3D01-0202-A679ED0A5D97}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{513FC818-313C-79D6-1678-90AC8CCB7C30}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "net8.0", "net8.0", "{91484732-D1A4-A797-420D-738E00F067FC}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkerExtensions", "src\obj\Debug\net8.0\WorkerExtensions\WorkerExtensions.csproj", "{017934E4-4922-76C7-4E04-9B7B43D16B18}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,20 +22,12 @@ Global
 		{AECBEAC1-3551-D6DE-7BFF-D7FB91513550}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AECBEAC1-3551-D6DE-7BFF-D7FB91513550}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AECBEAC1-3551-D6DE-7BFF-D7FB91513550}.Release|Any CPU.Build.0 = Release|Any CPU
-		{017934E4-4922-76C7-4E04-9B7B43D16B18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{017934E4-4922-76C7-4E04-9B7B43D16B18}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{017934E4-4922-76C7-4E04-9B7B43D16B18}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{017934E4-4922-76C7-4E04-9B7B43D16B18}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{AECBEAC1-3551-D6DE-7BFF-D7FB91513550} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
-		{47459019-0EE7-3D01-0202-A679ED0A5D97} = {108A3DD7-C28F-90A1-5CEB-F409847E62A8}
-		{513FC818-313C-79D6-1678-90AC8CCB7C30} = {47459019-0EE7-3D01-0202-A679ED0A5D97}
-		{91484732-D1A4-A797-420D-738E00F067FC} = {513FC818-313C-79D6-1678-90AC8CCB7C30}
-		{017934E4-4922-76C7-4E04-9B7B43D16B18} = {91484732-D1A4-A797-420D-738E00F067FC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D482EFAC-AAB7-4AC7-BA1B-FD7572B4A156}
